@@ -13,7 +13,7 @@ import { Rect } from "./components/rect";
 import { Text } from "./components/text";
 import styles from "./index.m.scss";
 
-export const RightPanel: FC = () => {
+export const RightPanel: FC<{ aiShift?: boolean }> = ({ aiShift }) => {
   const { editor } = useEditor();
   const [collapse, setCollapse] = useState(false);
   const [active, setActive] = useState<string[]>([]);
@@ -60,7 +60,9 @@ export const RightPanel: FC = () => {
   }, [range]);
 
   return (
-    <div className={cs(styles.container, collapse && styles.collapse)}>
+    <div
+      className={cs(styles.container, aiShift && styles.aiShift, collapse && styles.collapse)}
+    >
       <div className={cs(styles.op)} onClick={() => setCollapse(!collapse)}>
         <IconPlus />
       </div>

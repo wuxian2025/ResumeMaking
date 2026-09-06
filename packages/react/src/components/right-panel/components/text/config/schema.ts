@@ -9,6 +9,7 @@ export const schema: EditorSchema = {
   "link": { mark: true, inline: true },
   "color": { mark: true },
   "font-size": { mark: true },
+  "letter-spacing": { mark: true },
   "background": { mark: true },
   "divider": { block: true, void: true },
 };

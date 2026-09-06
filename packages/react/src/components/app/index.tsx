@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ContentChangeEvent } from "sketching-core";
 import { Editor, EDITOR_EVENT, LOG_LEVEL, Range } from "sketching-core";
 import { DeltaSet } from "sketching-delta";
@@ -18,6 +18,7 @@ Storage.setSuffix("");
 
 export const App: FC = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const [aiVisible, setAiVisible] = useState(false);
   const editor = useMemo(() => {
     const data = Storage.local.get<LocalStorageData>(STORAGE_KEY) || EXAMPLE;
     Background.setRange(Range.fromRect(data.x, data.y, data.width, data.height));
@@ -54,8 +55,8 @@ export const App: FC = () => {
 
   return (
     <WithEditor editor={editor}>
-      <Header></Header>
-      <Body ref={ref}></Body>
+      <Header aiVisible={aiVisible} onToggleAi={() => setAiVisible(value => !value)}></Header>
+      <Body ref={ref} aiVisible={aiVisible}></Body>
       <ContextMenu></ContextMenu>
     </WithEditor>
   );

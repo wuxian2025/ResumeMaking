@@ -5,13 +5,13 @@ import { Left } from "./components/left";
 import { Right } from "./components/right";
 import styles from "./index.m.scss";
 
-export const Header: FC = () => {
+export const Header: FC<{ aiVisible?: boolean; onToggleAi?: () => void }> = props => {
   const { editor } = useEditor();
 
   return (
     <div className={styles.container}>
       <Left editor={editor} />
-      <Right editor={editor} />
+      <Right editor={editor} aiVisible={props.aiVisible} onToggleAi={props.onToggleAi} />
     </div>
   );
 };

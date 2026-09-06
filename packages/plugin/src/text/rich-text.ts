@@ -47,6 +47,9 @@ export class RichText {
       const lineHeight = Number(
         line.config[TEXT_ATTRS.LINE_HEIGHT] || DEFAULT[TEXT_ATTRS.LINE_HEIGHT]
       );
+      // COMPAT: 逐字符手绘字间距，不使用原生`ctx.letterSpacing`以兼容各浏览器
+      // 行级`LETTER_SPACING`作为默认值，字符级配置可覆盖
+      const lineSpacing = Number(line.config[TEXT_ATTRS.LETTER_SPACING]) || 0;
       const lineOffset = getLineOffset(line);
       const getDefaultMatrix = (): TextMatrix => ({
         items: [],
@@ -62,6 +65,7 @@ export class RichText {
       });
       let matrix: TextMatrix = getDefaultMatrix();
       for (const fragment of line.chars) {
+        const fragmentSpacing = Number(fragment.config[TEXT_ATTRS.LETTER_SPACING]) || lineSpacing;
         for (const character of fragment.char) {
           const item = { char: character, config: { ...fragment.config } };
           const { metric, font } = this.measure(item.char, item.config);
@@ -75,7 +79,7 @@ export class RichText {
             ascent: metric.actualBoundingBoxAscent,
             descent: metric.actualBoundingBoxDescent,
           };
-          if (matrix.width + text.width + lineOffset > width) {
+          if (matrix.width + text.width + fragmentSpacing + lineOffset > width) {
             group.push(matrix);
             // 重置行`matrix`
             matrix = getDefaultMatrix();
@@ -86,7 +90,7 @@ export class RichText {
           text.height = fontHeight;
           matrix.originHeight = Math.max(matrix.originHeight, fontHeight);
           matrix.height = Math.max(matrix.height, fontHeight * lineHeight);
-          matrix.width = matrix.width + text.width;
+          matrix.width = matrix.width + text.width + fragmentSpacing;
           matrix.ascent = Math.max(matrix.ascent, metric.actualBoundingBoxAscent);
           matrix.descent = Math.max(matrix.descent, metric.actualBoundingBoxDescent);
           matrix.items.push(text);
@@ -124,12 +128,17 @@ export class RichText {
       const middleOffsetY = offsetYBaseLine - matrix.originHeight / 2;
       drawingList(ctx, matrix.config, offsetX, middleOffsetY, offsetYBaseLine);
       offsetX = offsetX + matrix.offsetX;
+      // COMPAT: 字间距与两端对齐的均分`gap`叠加，装饰线取其间距的一半延伸
       const gap = matrix.break
         ? 0
         : Math.max(0, (width - matrix.width - matrix.offsetX) / matrix.items.length);
-      const halfGap = gap / 2;
       for (let i = 0; i < matrix.items.length; ++i) {
         const item = matrix.items[i];
+        // 字符级字间距优先，行级作为默认值
+        const spacing =
+          Number(item.config[TEXT_ATTRS.LETTER_SPACING] ?? matrix.config[TEXT_ATTRS.LETTER_SPACING]) ||
+          0;
+        const halfGap = (gap + spacing) / 2;
         // Debug Text Render
         // drawingDebugLine(ctx, matrix, item, halfGap, offsetX, offsetY, offsetYBaseLine);
         // 连续绘制背景
@@ -142,7 +151,7 @@ export class RichText {
         drawingUnderline(ctx, matrix, item, halfGap, offsetX, offsetYBaseLine);
         // 绘制中划线
         drawingStrikeThrough(ctx, item, halfGap, offsetX, middleOffsetY);
-        offsetX = offsetX + item.width + gap;
+        offsetX = offsetX + item.width + spacing + gap;
       }
       offsetX = x;
       offsetY = offsetYBaseLine;

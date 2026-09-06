@@ -24,6 +24,12 @@ import { BLUE_6, GRAY_2 } from "sketching-utils";
 
 import { getDefaultTextDelta } from "./constant";
 
+/**
+ * `@block-kit/plugin`没有字间距属性
+ * 以 mark 形式注册进`schema`，字符级随选区应用、行级经`EOL`属性透传
+ */
+export const LETTER_SPACING_KEY = "letter-spacing";
+
 export const sketchToTextDelta = (lines: RichTextLines): Delta => {
   const delta = new Delta();
   for (const line of lines) {
@@ -61,6 +67,9 @@ export const sketchToTextDelta = (lines: RichTextLines): Delta => {
       if (config[TEXT_ATTRS.SIZE]) {
         attrs[FONT_SIZE_KEY] = config[TEXT_ATTRS.SIZE];
       }
+      if (config[TEXT_ATTRS.LETTER_SPACING]) {
+        attrs[LETTER_SPACING_KEY] = config[TEXT_ATTRS.LETTER_SPACING];
+      }
       const op = { insert: char, attributes: attrs } as InsertOp;
       delta.push(op);
     }
@@ -82,6 +91,9 @@ export const sketchToTextDelta = (lines: RichTextLines): Delta => {
     }
     if (line.config[TEXT_ATTRS.LINE_HEIGHT]) {
       lineAttrs[LINE_HEIGHT_KEY] = line.config[TEXT_ATTRS.LINE_HEIGHT];
+    }
+    if (line.config[TEXT_ATTRS.LETTER_SPACING]) {
+      lineAttrs[LETTER_SPACING_KEY] = line.config[TEXT_ATTRS.LETTER_SPACING];
     }
     delta.insertEOL(lineAttrs);
   }
@@ -111,6 +123,9 @@ export const textDeltaToSketch = (delta: Delta): RichTextLines => {
     }
     if (lineDeltaAttrs[LINE_HEIGHT_KEY]) {
       lineAttrs[TEXT_ATTRS.LINE_HEIGHT] = lineDeltaAttrs[LINE_HEIGHT_KEY].toString();
+    }
+    if (lineDeltaAttrs[LETTER_SPACING_KEY]) {
+      lineAttrs[TEXT_ATTRS.LETTER_SPACING] = lineDeltaAttrs[LETTER_SPACING_KEY].toString();
     }
     const firstOp = lineDelta.ops[0];
     if (firstOp && firstOp.attributes && firstOp.attributes[DIVIDER_KEY]) {
@@ -153,6 +168,9 @@ export const textDeltaToSketch = (delta: Delta): RichTextLines => {
       }
       if (opAttrs[FONT_SIZE_KEY]) {
         target[TEXT_ATTRS.SIZE] = opAttrs[FONT_SIZE_KEY];
+      }
+      if (opAttrs[LETTER_SPACING_KEY]) {
+        target[TEXT_ATTRS.LETTER_SPACING] = opAttrs[LETTER_SPACING_KEY].toString();
       }
       line.chars.push({ char: op.insert!, config: target });
     });

@@ -99,3 +99,8 @@ $width: 300px;
     }
   }
 }
+
+// COMPAT: AI 侧栏停靠时属性面板左移让位(组合类提升特异性)
+.container.aiShift {
+  right: 396px;
+}

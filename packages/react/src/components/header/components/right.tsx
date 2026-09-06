@@ -17,7 +17,9 @@ import { importJSON } from "../utils/import";
 
 export const Right: FC<{
   editor: Editor;
-}> = ({ editor }) => {
+  aiVisible?: boolean;
+  onToggleAi?: () => void;
+}> = ({ editor, aiVisible, onToggleAi }) => {
   const [undoAble, setUndoAble] = useState<boolean>(false);
   const [redoAble, setRedoAble] = useState<boolean>(false);
   const widthRef = useRef<RefInputType>(null);
@@ -95,6 +97,9 @@ export const Right: FC<{
           size="small"
         ></Button>
       </div>
+      <Button size="mini" type={aiVisible ? "primary" : "text"} onClick={onToggleAi}>
+        AI 助手
+      </Button>
       <Dropdown
         droplist={
           <Menu className={styles.menu}>
